@@ -1,0 +1,15 @@
+{
+  "name": "video-chat-server",
+  "version": "1.0.0",
+  "description": "Server for video chat",
+  "main": "index.js",
+  "author": "Stefan Vojvodic",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.2.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
