@@ -63,12 +63,13 @@ io.on('connection', function(socket) {
   socket.on('disconnect', () => {
     if (rooms.has(joinedRoom)) {
       const peers = rooms.get(joinedRoom);
+      rooms.set(joinedRoom, peers.filter(p => p !== user));
 
-      if (peers.length === 1) {
-        rooms.delete(joinedRoom);
-      } else {
-        rooms.set(joinedRoom, peers.filter(p => p !== user));
-      }
+      // TODO: delete empty rooms?
+      // if (peers.length === 1) {
+      //   // rooms.delete(joinedRoom);
+      // } else {
+      // }
     }
 
     joinedRoom = null;
