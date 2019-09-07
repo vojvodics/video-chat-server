@@ -11,7 +11,8 @@ const EVENTS = {
   ROOM_CREATED: 'ROOM_CREATED',
   INVALID_ROOM: 'INVALID_ROOM',
   JOIN_ROOM: 'JOIN_ROOM',
-  UPDATE_PEERS: 'UPDATE_PEERS'
+  UPDATE_PEERS: 'UPDATE_PEERS',
+  LEAVE_ROOM: 'LEAVE_ROOM'
 };
 
 // the list of rooms
@@ -48,6 +49,15 @@ io.on('connection', function(socket) {
 
     // send only to new connected peer - that peer will make a call to others
     socket.emit(EVENTS.UPDATE_PEERS, newPeers);
+  });
+
+  socket.on(EVENTS.LEAVE_ROOM, () => {
+    if (rooms.has(joinedRoom)) {
+      const peers = rooms.get(joinedRoom);
+
+      rooms.set(joinedRoom, peers.filter(p => p !== user));
+      socket.emit(EVENTS.UPDATE_PEERS, rooms.get(joinedRoom));
+    }
   });
 
   socket.on('disconnect', () => {
