@@ -22,13 +22,11 @@ io.on('connection', function(socket) {
   let user;
   let joinedRoom;
 
-  socket.on(EVENTS.INIT_ROOM, function(user) {
-    user = user;
+  socket.on(EVENTS.INIT_ROOM, function(u) {
+    user = u;
     const room = uuid();
 
-    rooms.set(room, [user]);
-
-    joinedRoom = room;
+    rooms.set(room, []);
 
     socket.emit(EVENTS.ROOM_CREATED, room);
   });
@@ -39,13 +37,16 @@ io.on('connection', function(socket) {
     }
 
     // ignore if user is already a part of one rooms
+    // handle it differently?
     if (joinedRoom) return;
 
     const peers = rooms.get(room);
     const newPeers = [...peers, user];
     rooms.set(room, newPeers);
 
-    // send only the new connected peer
+    joinedRoom = room;
+
+    // send only to new connected peer - that peer will make a call to others
     socket.emit(EVENTS.UPDATE_PEERS, newPeers);
   });
 
@@ -59,6 +60,8 @@ io.on('connection', function(socket) {
         rooms.set(joinedRoom, peers.filter(p => p !== user));
       }
     }
+
+    joinedRoom = null;
   });
 });
 
