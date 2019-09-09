@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 const uuid = require('uuidv4').default;
 
@@ -20,11 +19,10 @@ const EVENTS = {
 const rooms = new Map();
 
 io.on('connection', function(socket) {
-  let user;
-  let joinedRoom;
+  let currentUser;
+  let currentRoom;
 
-  socket.on(EVENTS.INIT_ROOM, function(u) {
-    user = u;
+  socket.on(EVENTS.INIT_ROOM, function() {
     const room = uuid();
 
     rooms.set(room, []);
@@ -32,38 +30,35 @@ io.on('connection', function(socket) {
     socket.emit(EVENTS.ROOM_CREATED, room);
   });
 
-  socket.on(EVENTS.JOIN_ROOM, function(room) {
+  socket.on(EVENTS.JOIN_ROOM, function(room, user) {
     if (!rooms.has(room)) {
       return socket.emit(EVENTS.INVALID_ROOM);
     }
-
-    // ignore if user is already a part of one rooms
-    // handle it differently?
-    if (joinedRoom) return;
 
     const peers = rooms.get(room);
     const newPeers = [...peers, user];
     rooms.set(room, newPeers);
 
-    joinedRoom = room;
+    currentUser = user;
+    currentRoom = room;
 
     // send only to new connected peer - that peer will make a call to others
     socket.emit(EVENTS.UPDATE_PEERS, newPeers);
   });
 
-  socket.on(EVENTS.LEAVE_ROOM, () => {
-    if (rooms.has(joinedRoom)) {
-      const peers = rooms.get(joinedRoom);
+  socket.on(EVENTS.LEAVE_ROOM, (roomId, user) => {
+    if (rooms.has(roomId)) {
+      const peers = rooms.get(roomId);
 
-      rooms.set(joinedRoom, peers.filter(p => p !== user));
-      socket.emit(EVENTS.UPDATE_PEERS, rooms.get(joinedRoom));
+      rooms.set(roomId, peers.filter(p => p !== user));
     }
   });
 
   socket.on('disconnect', () => {
-    if (rooms.has(joinedRoom)) {
-      const peers = rooms.get(joinedRoom);
-      rooms.set(joinedRoom, peers.filter(p => p !== user));
+    console.log(currentUser, 'disconnected from', currentRoom);
+    if (rooms.has(currentRoom)) {
+      const peers = rooms.get(currentRoom);
+      rooms.set(currentRoom, peers.filter(p => p !== currentUser));
 
       // TODO: delete empty rooms?
       // if (peers.length === 1) {
@@ -72,7 +67,8 @@ io.on('connection', function(socket) {
       // }
     }
 
-    joinedRoom = null;
+    currentUser = null;
+    currentRoom = null;
   });
 });
 
