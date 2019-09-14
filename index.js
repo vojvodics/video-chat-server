@@ -4,6 +4,13 @@ const uuid = require('uuidv4').default;
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const { ExpressPeerServer } = require('peer');
+
+const PORT = process.env.PORT || 3001;
+
+const peerserver = ExpressPeerServer(server, { port: PORT, path: '/peerjs' });
+
+app.use('/peerjs', peerserver);
 
 const EVENTS = {
   INIT_ROOM: 'INIT_ROOM',
@@ -72,4 +79,4 @@ io.on('connection', function(socket) {
   });
 });
 
-server.listen(process.env.PORT || 3001);
+server.listen(PORT);
