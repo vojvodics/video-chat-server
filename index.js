@@ -18,7 +18,9 @@ const EVENTS = {
   INVALID_ROOM: 'INVALID_ROOM',
   JOIN_ROOM: 'JOIN_ROOM',
   UPDATE_PEERS: 'UPDATE_PEERS',
-  LEAVE_ROOM: 'LEAVE_ROOM'
+  LEAVE_ROOM: 'LEAVE_ROOM',
+  CHECK_USERNAME: 'CHECK_USERNAME',
+  USERNAME_VALID: 'USERNAME_VALID'
 };
 
 // the list of rooms
@@ -35,6 +37,18 @@ io.on('connection', function(socket) {
     rooms.set(room, []);
 
     socket.emit(EVENTS.ROOM_CREATED, room);
+  });
+
+  socket.on(EVENTS.CHECK_USERNAME, (username, room) => {
+    if (!rooms.has(room)) {
+      return socket.emit(EVENTS.INVALID_ROOM);
+    }
+
+    const peers = rooms.get(room);
+
+    const usernameExists = peers.find(p => p === username);
+
+    socket.emit(EVENTS.USERNAME_VALID, !Boolean(usernameExists));
   });
 
   socket.on(EVENTS.JOIN_ROOM, function(room, user) {
