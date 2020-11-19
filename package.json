@@ -8,7 +8,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "peer": "^0.2.10",
-    "socket.io": "^2.2.0",
+    "socket.io": "^3.0.3",
     "uuidv4": "^5.0.1"
   },
   "scripts": {
