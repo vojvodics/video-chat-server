@@ -9,7 +9,7 @@
     "express": "^4.17.1",
     "peer": "^0.2.10",
     "socket.io": "^2.2.0",
-    "uuidv4": "^5.0.1"
+    "uuidv4": "^6.2.6"
   },
   "scripts": {
     "start": "node index.js"
